@@ -1,0 +1,41 @@
+name: IIO Sim
+
+on: [push, pull_request]
+
+jobs:
+  specific:
+    name: With ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["3.2.1", "3.16.1", "4.9.1", "5.9.6", "latest"]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build w/ specific kernel version
+      run: |
+        install -d linux
+        python3 fetch_linux.py ${{ matrix.version }} - | tar -C linux --strip-components=1 -xJ
+        make -C linux defconfig
+        make -C linux modules_prepare
+        make KERNELDIR="$PWD/linux"
+        /usr/sbin/modinfo *.ko
+
+  native:
+    name: VM Native
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dependencies
+      run: |
+        uname -a
+        sudo apt-get update
+        sudo apt-get -y install linux-headers-`uname -r`
+    - name: Build
+      run: make
+    - name: Install
+      run: |
+        sudo make modules_install
+        sudo depmod -a
+    - name: Load
+      run: |
+        sudo modprobe -v iio_sim
