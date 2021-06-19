@@ -18,6 +18,7 @@ def getargs():
                    help='Linux kernel version (eg. 5.9.9) or "latest"')
     P.add_argument('output', type=FileType('w'),
                    help='Output .tar.xz file, or - for stdout')
+    P.add_argument('-n', '--dry-run', action='store_true')
     return P
 
 class DirParser(HTMLParser):
@@ -45,7 +46,7 @@ class DirParser(HTMLParser):
 
         M=re.match(r'linux-(\d+(?:\.\d+)+)\.tar\.xz', link)
         if M:
-            self.kernels[tuple(M.group(1).split('.'))] = link
+            self.kernels[tuple(int(p) for p in M.group(1).split('.'))] = link
             return
 
     @classmethod
@@ -73,6 +74,7 @@ def main(args):
         series = list(P.series.items())
         series.sort()
         series.reverse()
+
         for ser, link in series:
             _log.info('Fetch series %s list', ser)
 
@@ -93,12 +95,19 @@ def main(args):
 
     _log.info('GET: %s', url)
 
+    if args.dry_run:
+        _log.info('Skip download')
+        return
+
+    nbytes = 0
     with urlopen(url) as F:
         while True:
             blob = F.read(2**20)
             if not blob:
                 break
+            nbytes += len(blob)
             args.output.buffer.write(blob)
+    _log.info('Wrote %u bytes', nbytes)
     args.output.buffer.flush()
 
 if __name__=='__main__':

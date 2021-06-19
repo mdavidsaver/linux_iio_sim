@@ -14,7 +14,7 @@ checking for consistency and dropped samples.
 It also prints aggregate statistics periodically.
 
 ```sh
-# Build
+# Build for host kernel
 make
 
 # Load
