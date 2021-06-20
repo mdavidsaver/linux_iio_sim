@@ -95,6 +95,14 @@ static void iio_sim_tick(struct timer_list *simtick)
     }
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+static void iio_sim_tick_compat(unsigned long data)
+{
+    iio_sim_tick((void *)data);
+}
+#define timer_setup(timer, fn, flags) setup_timer(timer, fn, NULL)
+#endif
+
 static int iio_sim_read_raw(struct iio_dev *idev,
                 struct iio_chan_spec const *chan, int max_len,
                 int *vals, int *val_len, long mask)
@@ -208,7 +216,13 @@ static struct iio_sim_device *iio_sim_create(void)
     if (ret < 0)
         goto free_kfifo;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
     timer_setup(&sdev->simtick, &iio_sim_tick, 0);
+
+#else
+    setup_timer(&sdev->simtick, &iio_sim_tick_compat,
+            (unsigned long)&sdev->simtick);
+#endif
 
     sim_dbg(sdev, "mask_len=%u\n", idev->masklength);
 

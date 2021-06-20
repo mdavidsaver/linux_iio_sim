@@ -13,6 +13,13 @@ The provided `iio-stream.py` script will consume the sample stream,
 checking for consistency and dropped samples.
 It also prints aggregate statistics periodically.
 
+Required Linux kernel configuration parameters (`y` or `m`)
+
+```
+CONFIG_IIO=m
+CONFIG_IIO_BUFFER=y
+```
+
 ```sh
 # Build for host kernel
 make

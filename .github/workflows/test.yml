@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["4.19.1", "5.9.6", "latest"]
+        version: ["4.9.1", "4.19.1", "5.9.6", "latest"]
     steps:
     - uses: actions/checkout@v2
     - name: Dependencies
@@ -22,6 +22,9 @@ jobs:
         install -d linux
         python3 fetch_linux.py ${{ matrix.version }} - | tar -C linux --strip-components=1 -xJ
         make -C linux defconfig
+        echo "CONFIG_IIO=y" >> linux/.config
+        echo "CONFIG_IIO_BUFFER=y" >> linux/.config
+        make -C linux olddefconfig
         make -C linux modules_prepare
         make KERNELDIR="$PWD/linux"
         /usr/sbin/modinfo *.ko
