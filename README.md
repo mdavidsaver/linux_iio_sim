@@ -43,3 +43,12 @@ and `--depth 65536` reached ~150 MB/s before saturating CPU, and triggering soft
 Jump start 711792505 711801545
   243.25 samples/syscall, 37978.93 syscalls/s, 9238244.57 samples/s, 140.964 MB/s
 ```
+
+A test on a zynqmq (zcu102) and Linux 4.9 (xilinx-2017.1) with `period_count==100000` and `period_ms` set for 60Hz effective,
+and `--depth 65536` reached ~67 MB/s before saturating CPU, and triggering soft lock warnings in the kernel log.
+
+```
+  2229.08 samples/syscall, 1970.34 syscalls/s, 4392046.40 samples/s, 67.017 MB/s
+  2229.29 samples/syscall, 1970.60 syscalls/s, 4393037.84 samples/s, 67.032 MB/s
+  2228.59 samples/syscall, 1970.52 syscalls/s, 4391487.90 samples/s, 67.009 MB/s
+```
